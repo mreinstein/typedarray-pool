@@ -5,8 +5,8 @@ var dup = require('dup')
 var Buffer = require('buffer').Buffer
 
 //Legacy pool support
-if(!global.__TYPEDARRAY_POOL) {
-  global.__TYPEDARRAY_POOL = {
+if(!globalThis.__TYPEDARRAY_POOL) {
+  globalThis.__TYPEDARRAY_POOL = {
       UINT8     : dup([32, 0])
     , UINT16    : dup([32, 0])
     , UINT32    : dup([32, 0])
@@ -26,7 +26,7 @@ if(!global.__TYPEDARRAY_POOL) {
 var hasUint8C = (typeof Uint8ClampedArray) !== 'undefined'
 var hasBigUint64 = (typeof BigUint64Array) !== 'undefined'
 var hasBigInt64 = (typeof BigInt64Array) !== 'undefined'
-var POOL = global.__TYPEDARRAY_POOL
+var POOL = globalThis.__TYPEDARRAY_POOL
 
 //Upgrade pool
 if(!POOL.UINT8C) {
