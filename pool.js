@@ -2,7 +2,6 @@
 
 var bits = require('bit-twiddle')
 var dup = require('dup')
-var Buffer = require('buffer').Buffer
 
 //Legacy pool support
 if(!globalThis.__TYPEDARRAY_POOL) {
@@ -19,7 +18,6 @@ if(!globalThis.__TYPEDARRAY_POOL) {
     , DOUBLE    : dup([32, 0])
     , DATA      : dup([32, 0])
     , UINT8C    : dup([32, 0])
-    , BUFFER    : dup([32, 0])
   }
 }
 
@@ -38,18 +36,12 @@ if(!POOL.BIGUINT64) {
 if(!POOL.BIGINT64) {
   POOL.BIGINT64 = dup([32, 0])
 }
-if(!POOL.BUFFER) {
-  POOL.BUFFER = dup([32, 0])
-}
 
-//New technique: Only allocate from ArrayBufferView and Buffer
+//New technique: Only allocate from ArrayBufferView
 var DATA    = POOL.DATA
-  , BUFFER  = POOL.BUFFER
 
 exports.free = function free(array) {
-  if(Buffer.isBuffer(array)) {
-    BUFFER[bits.log2(array.length)].push(array)
-  } else {
+  
     if(Object.prototype.toString.call(array) !== '[object ArrayBuffer]') {
       array = array.buffer
     }
@@ -59,7 +51,6 @@ exports.free = function free(array) {
     var n = array.length || array.byteLength
     var log_n = bits.log2(n)|0
     DATA[log_n].push(array)
-  }
 }
 
 function freeArrayBuffer(buffer) {
@@ -92,10 +83,6 @@ exports.freeDataView = freeTypedArray
 
 exports.freeArrayBuffer = freeArrayBuffer
 
-exports.freeBuffer = function freeBuffer(array) {
-  BUFFER[bits.log2(array.length)].push(array)
-}
-
 exports.malloc = function malloc(n, dtype) {
   if(dtype === undefined || dtype === 'arraybuffer') {
     return mallocArrayBuffer(n)
@@ -125,8 +112,6 @@ exports.malloc = function malloc(n, dtype) {
         return mallocBigInt64(n)
       case 'biguint64':
         return mallocBigUint64(n)
-      case 'buffer':
-        return mallocBuffer(n)
       case 'data':
       case 'dataview':
         return mallocDataView(n)
@@ -221,16 +206,6 @@ function mallocDataView(n) {
 }
 exports.mallocDataView = mallocDataView
 
-function mallocBuffer(n) {
-  n = bits.nextPow2(n)
-  var log_n = bits.log2(n)
-  var cache = BUFFER[log_n]
-  if(cache.length > 0) {
-    return cache.pop()
-  }
-  return new Buffer(n)
-}
-exports.mallocBuffer = mallocBuffer
 
 exports.clearCache = function clearCache() {
   for(var i=0; i<32; ++i) {
@@ -246,6 +221,5 @@ exports.clearCache = function clearCache() {
     POOL.BIGINT64[i].length = 0
     POOL.UINT8C[i].length = 0
     DATA[i].length = 0
-    BUFFER[i].length = 0
   }
 }

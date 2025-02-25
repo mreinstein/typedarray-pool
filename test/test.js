@@ -89,11 +89,6 @@ require("tape")("typedarray-pool", function(t) {
     }
     t.assert(a.length >= i)
     pool.free(a)
-
-    a = pool.malloc(i, "buffer")
-    t.assert(Buffer.isBuffer(a), "buffer")
-    t.assert(a.length >= i)
-    pool.free(a)
     
     a = pool.malloc(i)
     t.assert(a instanceof ArrayBuffer, "array buffer")
@@ -180,11 +175,6 @@ require("tape")("typedarray-pool", function(t) {
     }
     t.assert(a.length >= i)
     pool.freeBigUint64(a)
-
-    a = pool.mallocBuffer(i)
-    t.assert(Buffer.isBuffer(a), "buffer")
-    t.assert(a.length >= i)
-    pool.freeBuffer(a)
     
     a = pool.mallocArrayBuffer(i)
     t.assert(a instanceof ArrayBuffer, "array buffer")
